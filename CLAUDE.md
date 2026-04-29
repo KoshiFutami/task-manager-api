@@ -41,10 +41,26 @@ npm run lint             # ESLint 実行・修正
 
 ## 重要なルール
 
-1. **コミットメッセージは日本語** — 機能実装・テスト・設定変更など
-2. **テスト作成 → 実装 → コミット** — テストが通っていない実装は完了とみなさない
-3. **feature ブランチを使う** — main には直接コミットしない
-4. **PR 作成 → レビュー → マージ** — GitHub Actions で CI/CD 実行
+⚠️ **必須: main ブランチでの直接作業は禁止**
+
+すべての開発は feature ブランチで行う必須。main ブランチには PR のみ。
+
+1. **feature ブランチで開発** — `git checkout -b feature/機能名`
+2. **コミットメッセージは日本語** — `feat:` / `fix:` / `test:` など接頭辞付け
+3. **テスト作成 → 実装 → コミット** — テストが通っていない実装は完了とみなさない
+4. **PR 作成 → CI/CD 確認 → マージ** — GitHub Actions ですべてチェック
+
+### main ブランチが main のままになることを確認
+
+```bash
+# main ブランチに切らない
+git checkout -b feature/新機能名  # ✅ 正しい
+git checkout main                # ❌ 間違い
+
+# PR からマージのみ
+gh pr create --title "feat: 説明"  # ✅ PR 作成
+git push origin main               # ❌ 直接プッシュ禁止
+```
 
 ## Docker
 
