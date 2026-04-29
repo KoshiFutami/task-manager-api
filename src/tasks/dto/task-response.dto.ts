@@ -3,4 +3,6 @@ export class TaskResponseDto {
   title: string;
   description: string;
   done: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
