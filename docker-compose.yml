@@ -23,6 +23,8 @@ services:
       MYSQL_DATABASE: task_manager
       MYSQL_USER: nestuser
       MYSQL_PASSWORD: nestpassword
+      TZ: 'Asia/Tokyo'
+      MYSQL_INIT_COMMAND: "SET time_zone = '+09:00'"
     ports:
       - '3306:3306'
     volumes:
