@@ -92,8 +92,7 @@ describe('TasksService', () => {
       mockRepository.update.mockResolvedValue({ affected: 1 });
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('invalid-id', updateTaskDto))
-        .rejects.toThrow(NotFoundException);
+      await expect(service.update('invalid-id', updateTaskDto)).rejects.toThrow(NotFoundException);
     });
   });
 
