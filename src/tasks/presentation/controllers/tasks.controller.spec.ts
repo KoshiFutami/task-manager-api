@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TasksController } from './tasks.controller';
-import { TasksService } from './tasks.service';
-import { TaskResponseDto } from './dto/task-response.dto';
+import { TasksService } from '../../application/services/tasks.service';
+import { TaskResponseDto } from '../../application/dtos/task-response.dto';
 
 describe('TasksController', () => {
   let controller: TasksController;
@@ -11,7 +11,7 @@ describe('TasksController', () => {
     id: 'uuid-1',
     title: 'テストタスク',
     description: 'テスト説明',
-    done: false,
+    status: 'todo',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
