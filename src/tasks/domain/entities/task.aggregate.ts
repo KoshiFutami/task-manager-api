@@ -3,6 +3,8 @@ import { TaskId } from '../value-objects/task-id';
 import { TaskStatus } from '../value-objects/task-status';
 import { TaskTitle } from '../value-objects/task-title';
 import { InvalidTaskStatusTransitionError } from '../exceptions/invalid-task-status-transition-error';
+import { TaskCreated } from '../events/task-created';
+import { TaskStatusChanged } from '../events/task-status-changed';
 
 export class Task {
   private readonly id: TaskId;
@@ -11,6 +13,7 @@ export class Task {
   private status: TaskStatus;
   private readonly createdAt: Date;
   private updatedAt: Date;
+  private domainEvents: (TaskCreated | TaskStatusChanged)[] = [];
 
   private constructor(props: {
     id: TaskId;
@@ -29,7 +32,7 @@ export class Task {
   }
 
   static create(title: TaskTitle, description: TaskDescription): Task {
-    return new Task({
+    const task = new Task({
       id: TaskId.create(),
       title: title,
       description: description,
@@ -37,6 +40,10 @@ export class Task {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
+    task.domainEvents.push(new TaskCreated(task.id, task.title));
+
+    return task;
   }
 
   static from(props: {
@@ -64,8 +71,14 @@ export class Task {
         nextStatus: newStatus,
       });
     }
+
+    const previousStatus = this.status;
     this.status = newStatus;
     this.updatedAt = new Date();
+
+    this.domainEvents.push(
+      new TaskStatusChanged(this.id, previousStatus, newStatus),
+    );
   }
 
   getId(): TaskId {
@@ -90,5 +103,13 @@ export class Task {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  getDomainEvents(): (TaskCreated | TaskStatusChanged)[] {
+    return this.domainEvents;
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
   }
 }
