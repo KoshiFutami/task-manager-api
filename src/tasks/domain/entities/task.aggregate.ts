@@ -76,9 +76,7 @@ export class Task {
     this.status = newStatus;
     this.updatedAt = new Date();
 
-    this.domainEvents.push(
-      new TaskStatusChanged(this.id, previousStatus, newStatus),
-    );
+    this.domainEvents.push(new TaskStatusChanged(this.id, previousStatus, newStatus));
   }
 
   getId(): TaskId {

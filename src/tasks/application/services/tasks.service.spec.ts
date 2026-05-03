@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TasksService } from './tasks.service';
-import { Task } from './entities/task.entity';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
+import { Task } from '../../infrastructure/persistence/task.entity';
+import { CreateTaskDto } from '../dtos/create-task.dto';
+import { UpdateTaskDto } from '../dtos/update-task.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('TasksService', () => {
@@ -15,7 +15,7 @@ describe('TasksService', () => {
     id: 'uuid-1',
     title: 'テストタスク',
     description: 'テスト説明',
-    done: false,
+    status: 'todo',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
