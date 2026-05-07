@@ -1,12 +1,12 @@
 import { Task } from '../entities/task.aggregate';
 import { TaskId } from '../value-objects/task-id';
 
-export interface ITaskRepository {
-  save(task: Task): Promise<void>;
+export abstract class ITaskRepository {
+  abstract save(task: Task): Promise<void>;
 
-  findById(taskId: TaskId): Promise<Task | null>;
+  abstract findById(taskId: TaskId): Promise<Task | null>;
 
-  findAll(): Promise<Task[]>;
+  abstract findAll(): Promise<Task[]>;
 
-  delete(taskId: TaskId): Promise<void>;
+  abstract delete(taskId: TaskId): Promise<void>;
 }

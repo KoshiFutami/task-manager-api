@@ -87,8 +87,16 @@ export class Task {
     return this.title;
   }
 
+  changeTitle(newTitle: TaskTitle) {
+    this.title = newTitle;
+  }
+
   getDescription(): TaskDescription {
     return this.description;
+  }
+
+  changeDescription(newDescription: TaskDescription) {
+    this.description = newDescription;
   }
 
   getStatus(): TaskStatus {

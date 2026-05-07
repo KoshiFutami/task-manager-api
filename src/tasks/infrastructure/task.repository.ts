@@ -7,7 +7,7 @@ import { Task } from '../domain/entities/task.aggregate';
 import { TaskId } from '../domain/value-objects/task-id';
 
 @Injectable()
-export class TaskRepositoryImpl implements ITaskRepository {
+export class TaskRepositoryImpl extends ITaskRepository {
   constructor(
     @InjectRepository(TaskEntity)
     private readonly ormRepository: Repository<TaskEntity>,

@@ -1,40 +1,69 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Task } from '../../infrastructure/persistence/task.entity';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Task } from 'src/tasks/domain/entities/task.aggregate';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { TaskResponseDto } from '../dtos/task-response.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { UpdateTaskDto } from '../dtos/update-task.dto';
+import { ITaskRepository } from 'src/tasks/domain/repositories/task.repository';
+import { TaskTitle } from 'src/tasks/domain/value-objects/task-title';
+import { TaskDescription } from 'src/tasks/domain/value-objects/task-description';
+import { TaskId } from 'src/tasks/domain/value-objects/task-id';
+import { TaskStatus } from 'src/tasks/domain/value-objects/task-status';
 
 @Injectable()
 export class TasksService {
   constructor(
-    @InjectRepository(Task)
-    private readonly taskRepository: Repository<Task>,
+    @Inject(ITaskRepository)
+    private readonly taskRepository: ITaskRepository,
   ) {}
 
-  findAll(): Promise<TaskResponseDto[]> {
-    return this.taskRepository.find() as Promise<TaskResponseDto[]>;
+  async findAll(): Promise<TaskResponseDto[]> {
+    const tasks = await this.taskRepository.findAll();
+    return tasks.map((task) => this.toDto(task));
   }
 
-  create(createTaskDto: CreateTaskDto): Promise<TaskResponseDto> {
-    const task = this.taskRepository.create(createTaskDto);
-    return this.taskRepository.save(task) as Promise<TaskResponseDto>;
+  async create(createTaskDto: CreateTaskDto): Promise<TaskResponseDto> {
+    const task = Task.create(
+      TaskTitle.from(createTaskDto.title),
+      TaskDescription.from(createTaskDto.description),
+    );
+    await this.taskRepository.save(task);
+    return this.toDto(task);
   }
 
-  async update(id: string, updateTaskDto: UpdateTaskDto): Promise<TaskResponseDto> {
-    await this.taskRepository.update(id, updateTaskDto);
-    const task = await this.taskRepository.findOne({ where: { id } });
-    if (!task) {
-      throw new NotFoundException(`Task not found: ${id}`);
-    }
-    return task as TaskResponseDto;
+  async update(
+    id: string,
+    updateTaskDto: UpdateTaskDto,
+  ): Promise<TaskResponseDto> {
+    const task = await this.taskRepository.findById(TaskId.from(id));
+    if (!task) throw new NotFoundException(`Task not found: ${id}`);
+
+    if (updateTaskDto.title)
+      task.changeTitle(TaskTitle.from(updateTaskDto.title));
+    if (updateTaskDto.description)
+      task.changeDescription(TaskDescription.from(updateTaskDto.description));
+    if (updateTaskDto.status)
+      task.changeStatus(TaskStatus.from(updateTaskDto.status));
+
+    await this.taskRepository.save(task);
+    return this.toDto(task);
   }
 
   async remove(id: string) {
-    const result = await this.taskRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Task not found: ${id}`);
-    }
+    const taskId = TaskId.from(id);
+    const task = await this.taskRepository.findById(taskId);
+    if (!task) throw new NotFoundException(`Task not found: ${id}`);
+
+    await this.taskRepository.delete(taskId);
+  }
+
+  private toDto(task: Task): TaskResponseDto {
+    return {
+      id: task.getId().getValue(),
+      title: task.getTitle().getValue(),
+      description: task.getDescription().getValue(),
+      status: task.getStatus().getValue(),
+      createdAt: task.getCreatedAt(),
+      updatedAt: task.getUpdatedAt(),
+    };
   }
 }
