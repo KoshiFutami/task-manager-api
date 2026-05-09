@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Task } from 'src/tasks/domain/entities/task.aggregate';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { TaskResponseDto } from '../dtos/task-response.dto';
@@ -9,6 +9,7 @@ import { TaskDescription } from 'src/tasks/domain/value-objects/task-description
 import { TaskId } from 'src/tasks/domain/value-objects/task-id';
 import { TaskStatus } from 'src/tasks/domain/value-objects/task-status';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InvalidTaskStatusTransitionError } from 'src/tasks/domain/exceptions/invalid-task-status-transition-error';
 
 @Injectable()
 export class TasksService {
@@ -45,7 +46,14 @@ export class TasksService {
     if (updateTaskDto.title) task.changeTitle(TaskTitle.from(updateTaskDto.title));
     if (updateTaskDto.description)
       task.changeDescription(TaskDescription.from(updateTaskDto.description));
-    if (updateTaskDto.status) task.changeStatus(TaskStatus.from(updateTaskDto.status));
+    try {
+      if (updateTaskDto.status) task.changeStatus(TaskStatus.from(updateTaskDto.status));
+    } catch (error) {
+      if (error instanceof InvalidTaskStatusTransitionError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
 
     await this.taskRepository.save(task);
 
