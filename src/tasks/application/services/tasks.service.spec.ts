@@ -9,12 +9,14 @@ import { TaskStatus } from 'src/tasks/domain/value-objects/task-status';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { UpdateTaskDto } from '../dtos/update-task.dto';
 
-const buildMockTask = (overrides: Partial<{
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-}> = {}): Task => {
+const buildMockTask = (
+  overrides: Partial<{
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+  }> = {},
+): Task => {
   return Task.from({
     id: overrides.id ?? 'uuid-1',
     title: overrides.title ?? 'テストタスク',

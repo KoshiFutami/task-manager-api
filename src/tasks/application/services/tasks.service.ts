@@ -30,19 +30,14 @@ export class TasksService {
     return this.toDto(task);
   }
 
-  async update(
-    id: string,
-    updateTaskDto: UpdateTaskDto,
-  ): Promise<TaskResponseDto> {
+  async update(id: string, updateTaskDto: UpdateTaskDto): Promise<TaskResponseDto> {
     const task = await this.taskRepository.findById(TaskId.from(id));
     if (!task) throw new NotFoundException(`Task not found: ${id}`);
 
-    if (updateTaskDto.title)
-      task.changeTitle(TaskTitle.from(updateTaskDto.title));
+    if (updateTaskDto.title) task.changeTitle(TaskTitle.from(updateTaskDto.title));
     if (updateTaskDto.description)
       task.changeDescription(TaskDescription.from(updateTaskDto.description));
-    if (updateTaskDto.status)
-      task.changeStatus(TaskStatus.from(updateTaskDto.status));
+    if (updateTaskDto.status) task.changeStatus(TaskStatus.from(updateTaskDto.status));
 
     await this.taskRepository.save(task);
     return this.toDto(task);
