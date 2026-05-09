@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TasksService } from './tasks.service';
 import { ITaskRepository } from 'src/tasks/domain/repositories/task.repository';
 import { Task } from 'src/tasks/domain/entities/task.aggregate';
@@ -37,6 +38,10 @@ describe('TasksService', () => {
     delete: jest.fn(),
   };
 
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -44,6 +49,10 @@ describe('TasksService', () => {
         {
           provide: ITaskRepository,
           useValue: mockRepository,
+        },
+        {
+          provide: EventEmitter2,
+          useValue: mockEventEmitter,
         },
       ],
     }).compile();
@@ -66,6 +75,7 @@ describe('TasksService', () => {
           title: mockTask.getTitle().getValue(),
           description: mockTask.getDescription().getValue(),
           status: mockTask.getStatus().getValue(),
+          statusDisplayName: mockTask.getStatus().getDisplayName(),
           createdAt: mockTask.getCreatedAt(),
           updatedAt: mockTask.getUpdatedAt(),
         },
