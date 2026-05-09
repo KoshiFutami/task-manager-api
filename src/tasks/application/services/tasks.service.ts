@@ -8,12 +8,14 @@ import { TaskTitle } from 'src/tasks/domain/value-objects/task-title';
 import { TaskDescription } from 'src/tasks/domain/value-objects/task-description';
 import { TaskId } from 'src/tasks/domain/value-objects/task-id';
 import { TaskStatus } from 'src/tasks/domain/value-objects/task-status';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TasksService {
   constructor(
     @Inject(ITaskRepository)
     private readonly taskRepository: ITaskRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(): Promise<TaskResponseDto[]> {
@@ -27,6 +29,12 @@ export class TasksService {
       TaskDescription.from(createTaskDto.description),
     );
     await this.taskRepository.save(task);
+
+    task.getDomainEvents().forEach((event) => {
+      this.eventEmitter.emit(event.eventType, event);
+    });
+    task.clearDomainEvents();
+
     return this.toDto(task);
   }
 
@@ -40,6 +48,12 @@ export class TasksService {
     if (updateTaskDto.status) task.changeStatus(TaskStatus.from(updateTaskDto.status));
 
     await this.taskRepository.save(task);
+
+    task.getDomainEvents().forEach((event) => {
+      this.eventEmitter.emit(event.eventType, event);
+    });
+    task.clearDomainEvents();
+
     return this.toDto(task);
   }
 
@@ -57,6 +71,7 @@ export class TasksService {
       title: task.getTitle().getValue(),
       description: task.getDescription().getValue(),
       status: task.getStatus().getValue(),
+      statusDisplayName: task.getStatus().getDisplayName(),
       createdAt: task.getCreatedAt(),
       updatedAt: task.getUpdatedAt(),
     };

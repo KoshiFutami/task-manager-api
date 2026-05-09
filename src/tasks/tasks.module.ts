@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from './infrastructure/persistence/task.entity';
 import { TaskRepositoryImpl } from './infrastructure/task.repository';
 import { ITaskRepository } from './domain/repositories/task.repository';
+import { TaskCreatedHandler } from './application/event-handlers/task-created.handler';
+import { TaskStatusChangedHandler } from './application/event-handlers/task-status-changed.handler';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Task])],
@@ -15,6 +17,8 @@ import { ITaskRepository } from './domain/repositories/task.repository';
       provide: ITaskRepository,
       useClass: TaskRepositoryImpl,
     },
+    TaskCreatedHandler,
+    TaskStatusChangedHandler,
   ],
 })
 export class TasksModule {}

@@ -35,4 +35,13 @@ export class TaskStatus {
 
     return true;
   }
+
+  getDisplayName(): string {
+    const map = {
+      todo: '未着手',
+      in_progress: '進行中',
+      done: '完了',
+    };
+    return map[this.value];
+  }
 }

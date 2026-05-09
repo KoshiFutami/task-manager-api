@@ -6,6 +6,7 @@ export class UpdateTaskDto {
   title?: string;
 
   @IsString()
+  @IsOptional()
   description?: string;
 
   @IsString()
