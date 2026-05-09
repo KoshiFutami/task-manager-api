@@ -7,7 +7,7 @@ export class TaskCreated extends DomainEvent {
 
   constructor(
     public readonly taskId: TaskId,
-    public readonly title: TaskTitle,
+    public readonly taskTitle: TaskTitle,
   ) {
     super();
   }

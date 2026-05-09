@@ -3,10 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TasksModule } from './tasks/tasks.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Task } from './tasks/entities/task.entity';
+import { Task } from './tasks/infrastructure/persistence/task.entity';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     TasksModule,
     TypeOrmModule.forRoot({
       type: 'mysql',

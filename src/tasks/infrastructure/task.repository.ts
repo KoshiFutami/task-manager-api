@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ITaskRepository } from '../domain/repositories/task.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Task as TaskEntity } from '../entities/task.entity';
+import { Task as TaskEntity } from './persistence/task.entity';
 import { Repository } from 'typeorm';
 import { Task } from '../domain/entities/task.aggregate';
 import { TaskId } from '../domain/value-objects/task-id';
@@ -11,7 +11,9 @@ export class TaskRepositoryImpl extends ITaskRepository {
   constructor(
     @InjectRepository(TaskEntity)
     private readonly ormRepository: Repository<TaskEntity>,
-  ) {}
+  ) {
+    super();
+  }
 
   async save(task: Task): Promise<void> {
     const entity = this.toPersistence(task);

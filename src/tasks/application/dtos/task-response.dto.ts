@@ -3,6 +3,7 @@ export class TaskResponseDto {
   title: string;
   description: string;
   status: string;
+  statusDisplayName: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TasksService } from './tasks.service';
 import { ITaskRepository } from 'src/tasks/domain/repositories/task.repository';
 import { Task } from 'src/tasks/domain/entities/task.aggregate';
@@ -9,12 +10,14 @@ import { TaskStatus } from 'src/tasks/domain/value-objects/task-status';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { UpdateTaskDto } from '../dtos/update-task.dto';
 
-const buildMockTask = (overrides: Partial<{
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-}> = {}): Task => {
+const buildMockTask = (
+  overrides: Partial<{
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+  }> = {},
+): Task => {
   return Task.from({
     id: overrides.id ?? 'uuid-1',
     title: overrides.title ?? 'テストタスク',
@@ -35,6 +38,10 @@ describe('TasksService', () => {
     delete: jest.fn(),
   };
 
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -42,6 +49,10 @@ describe('TasksService', () => {
         {
           provide: ITaskRepository,
           useValue: mockRepository,
+        },
+        {
+          provide: EventEmitter2,
+          useValue: mockEventEmitter,
         },
       ],
     }).compile();
@@ -64,6 +75,7 @@ describe('TasksService', () => {
           title: mockTask.getTitle().getValue(),
           description: mockTask.getDescription().getValue(),
           status: mockTask.getStatus().getValue(),
+          statusDisplayName: mockTask.getStatus().getDisplayName(),
           createdAt: mockTask.getCreatedAt(),
           updatedAt: mockTask.getUpdatedAt(),
         },
