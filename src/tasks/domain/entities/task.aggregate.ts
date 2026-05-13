@@ -5,21 +5,25 @@ import { TaskTitle } from '../value-objects/task-title';
 import { InvalidTaskStatusTransitionError } from '../exceptions/invalid-task-status-transition-error';
 import { TaskCreated } from '../events/task-created';
 import { TaskStatusChanged } from '../events/task-status-changed';
+import { UserId } from 'src/users/domain/value-objects/user-id';
+import { TaskAssigned } from '../events/task-assigned';
 
 export class Task {
   private readonly id: TaskId;
   private title: TaskTitle;
   private description: TaskDescription;
   private status: TaskStatus;
+  private assigneeId: UserId | null;
   private readonly createdAt: Date;
   private updatedAt: Date;
-  private domainEvents: (TaskCreated | TaskStatusChanged)[] = [];
+  private domainEvents: (TaskCreated | TaskStatusChanged | TaskAssigned)[] = [];
 
   private constructor(props: {
     id: TaskId;
     title: TaskTitle;
     description: TaskDescription;
     status: TaskStatus;
+    assigneeId: UserId | null;
     createdAt: Date;
     updatedAt: Date;
   }) {
@@ -27,6 +31,7 @@ export class Task {
     this.title = props.title;
     this.description = props.description;
     this.status = props.status;
+    this.assigneeId = props.assigneeId;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
@@ -37,6 +42,7 @@ export class Task {
       title: title,
       description: description,
       status: TaskStatus.create(),
+      assigneeId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -51,6 +57,7 @@ export class Task {
     title: string;
     description: string | undefined;
     status: string;
+    assigneeId: string | null;
     createdAt: Date;
     updatedAt: Date;
   }): Task {
@@ -59,6 +66,7 @@ export class Task {
       title: TaskTitle.from(props.title),
       description: TaskDescription.from(props.description),
       status: TaskStatus.from(props.status),
+      assigneeId: props.assigneeId ? UserId.from(props.assigneeId) : null,
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
     });
@@ -103,6 +111,21 @@ export class Task {
     return this.status;
   }
 
+  getAssigneeId(): UserId | null {
+    return this.assigneeId;
+  }
+
+  assignTo(userId: UserId): void {
+    this.assigneeId = userId;
+    this.updatedAt = new Date();
+
+    this.domainEvents.push(new TaskAssigned(this.id, this.assigneeId));
+  }
+
+  unassign(): void {
+    this.assigneeId = null;
+  }
+
   getCreatedAt(): Date {
     return this.createdAt;
   }
@@ -111,7 +134,7 @@ export class Task {
     return this.updatedAt;
   }
 
-  getDomainEvents(): (TaskCreated | TaskStatusChanged)[] {
+  getDomainEvents(): (TaskCreated | TaskStatusChanged | TaskAssigned)[] {
     return this.domainEvents;
   }
 

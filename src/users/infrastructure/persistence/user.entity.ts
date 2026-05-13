@@ -7,21 +7,12 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Task {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 255 })
-  title: string;
-
-  @Column({ length: 1000 })
-  description: string;
-
-  @Column()
-  status: string;
-
-  @Column({ type: 'varchar', length: 36, nullable: true })
-  assigneeId: string | null;
+  @Column({ length: 50 })
+  name: string;
 
   @CreateDateColumn()
   createdAt: Date;
