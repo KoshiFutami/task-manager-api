@@ -6,168 +6,252 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000",
+      "value": "http://localhost:3000/api",
       "type": "string"
     },
     {
       "key": "taskId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
     {
-      "name": "タスク一覧取得",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/tasks",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks"]
-        }
-      }
-    },
-    {
-      "name": "タスク作成",
-      "event": [
+      "name": "Users",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "const res = pm.response.json();",
-              "if (res.id) { pm.collectionVariables.set('taskId', res.id); }"
+          "name": "ユーザー一覧取得",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "ユーザー作成",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) { pm.collectionVariables.set('userId', res.id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "type": "text/javascript"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"山田 太郎\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "タスク一覧取得",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"サンプルタスク\",\n  \"description\": \"これはテスト用のタスクです\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/tasks",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks"]
-        }
-      }
-    },
-    {
-      "name": "タスク更新（タイトル変更）",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "タスク作成",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) { pm.collectionVariables.set('taskId', res.id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"サンプルタスク\",\n  \"description\": \"これはテスト用のタスクです\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"更新されたタイトル\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/tasks/{{taskId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks", "{{taskId}}"]
-        }
-      }
-    },
-    {
-      "name": "タスク更新（ステータス変更: in_progress）",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "タスク更新（タイトル変更）",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"更新されたタイトル\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"status\": \"in_progress\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/tasks/{{taskId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks", "{{taskId}}"]
-        }
-      }
-    },
-    {
-      "name": "タスク更新（ステータス変更: done）",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "タスク更新（ステータス変更: in_progress）",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"status\": \"done\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/tasks/{{taskId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks", "{{taskId}}"]
-        }
-      }
-    },
-    {
-      "name": "タスク更新（無効なステータス遷移: done → todo）",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "タスク更新（ステータス変更: done）",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"done\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"status\": \"todo\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/tasks/{{taskId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks", "{{taskId}}"]
+        {
+          "name": "タスク更新（無効なステータス遷移: done → todo）",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"todo\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
+          }
+        },
+        {
+          "name": "タスクにユーザーをアサイン",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/assign/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "assign", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "タスクのアサイン解除",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}/unassign",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}", "unassign"]
+            }
+          }
+        },
+        {
+          "name": "タスク削除",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
+          }
+        },
+        {
+          "name": "タスク削除（存在しないID）",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/invalid-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "invalid-id"]
+            }
+          }
         }
-      }
-    },
-    {
-      "name": "タスク削除",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/tasks/{{taskId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks", "{{taskId}}"]
-        }
-      }
-    },
-    {
-      "name": "タスク削除（存在しないID）",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/tasks/invalid-id",
-          "host": ["{{baseUrl}}"],
-          "path": ["tasks", "invalid-id"]
-        }
-      }
+      ]
     }
   ]
 }
