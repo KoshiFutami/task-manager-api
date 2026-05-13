@@ -3,10 +3,9 @@ import { NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TasksService } from './tasks.service';
 import { ITaskRepository } from 'src/tasks/domain/repositories/task.repository';
+import { IUserRepository } from 'src/users/domain/repositories/user.repository';
 import { Task } from 'src/tasks/domain/entities/task.aggregate';
-import { TaskTitle } from 'src/tasks/domain/value-objects/task-title';
-import { TaskDescription } from 'src/tasks/domain/value-objects/task-description';
-import { TaskStatus } from 'src/tasks/domain/value-objects/task-status';
+import { User } from 'src/users/domain/entities/user.aggregate';
 import { CreateTaskDto } from '../dtos/create-task.dto';
 import { UpdateTaskDto } from '../dtos/update-task.dto';
 
@@ -16,6 +15,7 @@ const buildMockTask = (
     title: string;
     description: string;
     status: string;
+    assigneeId: string | null;
   }> = {},
 ): Task => {
   return Task.from({
@@ -23,6 +23,16 @@ const buildMockTask = (
     title: overrides.title ?? 'テストタスク',
     description: overrides.description ?? 'テスト説明',
     status: overrides.status ?? 'todo',
+    assigneeId: overrides.assigneeId ?? null,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  });
+};
+
+const buildMockUser = (): User => {
+  return User.from({
+    id: 'user-uuid-1',
+    name: 'テストユーザー',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   });
@@ -31,11 +41,17 @@ const buildMockTask = (
 describe('TasksService', () => {
   let service: TasksService;
 
-  const mockRepository = {
+  const mockTaskRepository = {
     findAll: jest.fn(),
     findById: jest.fn(),
     save: jest.fn(),
     delete: jest.fn(),
+  };
+
+  const mockUserRepository = {
+    findAll: jest.fn(),
+    findById: jest.fn(),
+    save: jest.fn(),
   };
 
   const mockEventEmitter = {
@@ -48,7 +64,11 @@ describe('TasksService', () => {
         TasksService,
         {
           provide: ITaskRepository,
-          useValue: mockRepository,
+          useValue: mockTaskRepository,
+        },
+        {
+          provide: IUserRepository,
+          useValue: mockUserRepository,
         },
         {
           provide: EventEmitter2,
@@ -65,7 +85,7 @@ describe('TasksService', () => {
   describe('findAll', () => {
     it('すべてのタスクを取得できること', async () => {
       const mockTask = buildMockTask();
-      mockRepository.findAll.mockResolvedValue([mockTask]);
+      mockTaskRepository.findAll.mockResolvedValue([mockTask]);
 
       const result = await service.findAll();
 
@@ -76,6 +96,7 @@ describe('TasksService', () => {
           description: mockTask.getDescription().getValue(),
           status: mockTask.getStatus().getValue(),
           statusDisplayName: mockTask.getStatus().getDisplayName(),
+          assigneeId: null,
           createdAt: mockTask.getCreatedAt(),
           updatedAt: mockTask.getUpdatedAt(),
         },
@@ -89,14 +110,15 @@ describe('TasksService', () => {
         title: '新規タスクタイトル',
         description: '新規タスク説明',
       };
-      mockRepository.save.mockResolvedValue(undefined);
+      mockTaskRepository.save.mockResolvedValue(undefined);
 
       const result = await service.create(createTaskDto);
 
-      expect(mockRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockTaskRepository.save).toHaveBeenCalledTimes(1);
       expect(result.title).toBe('新規タスクタイトル');
       expect(result.description).toBe('新規タスク説明');
       expect(result.status).toBe('todo');
+      expect(result.assigneeId).toBeNull();
     });
   });
 
@@ -104,8 +126,8 @@ describe('TasksService', () => {
     it('タイトルを更新できること', async () => {
       const mockTask = buildMockTask();
       const updateTaskDto: UpdateTaskDto = { title: '更新タイトル' };
-      mockRepository.findById.mockResolvedValue(mockTask);
-      mockRepository.save.mockResolvedValue(undefined);
+      mockTaskRepository.findById.mockResolvedValue(mockTask);
+      mockTaskRepository.save.mockResolvedValue(undefined);
 
       const result = await service.update('uuid-1', updateTaskDto);
 
@@ -115,8 +137,8 @@ describe('TasksService', () => {
     it('ステータスを更新できること', async () => {
       const mockTask = buildMockTask();
       const updateTaskDto: UpdateTaskDto = { status: 'in_progress' };
-      mockRepository.findById.mockResolvedValue(mockTask);
-      mockRepository.save.mockResolvedValue(undefined);
+      mockTaskRepository.findById.mockResolvedValue(mockTask);
+      mockTaskRepository.save.mockResolvedValue(undefined);
 
       const result = await service.update('uuid-1', updateTaskDto);
 
@@ -125,7 +147,7 @@ describe('TasksService', () => {
 
     it('タスクが見つからないときはNotFoundExceptionを投げること', async () => {
       const updateTaskDto: UpdateTaskDto = { title: '更新' };
-      mockRepository.findById.mockResolvedValue(null);
+      mockTaskRepository.findById.mockResolvedValue(null);
 
       await expect(service.update('invalid-id', updateTaskDto)).rejects.toThrow(NotFoundException);
     });
@@ -134,18 +156,64 @@ describe('TasksService', () => {
   describe('remove', () => {
     it('タスクを削除できること', async () => {
       const mockTask = buildMockTask();
-      mockRepository.findById.mockResolvedValue(mockTask);
-      mockRepository.delete.mockResolvedValue(undefined);
+      mockTaskRepository.findById.mockResolvedValue(mockTask);
+      mockTaskRepository.delete.mockResolvedValue(undefined);
 
       await service.remove('uuid-1');
 
-      expect(mockRepository.delete).toHaveBeenCalledTimes(1);
+      expect(mockTaskRepository.delete).toHaveBeenCalledTimes(1);
     });
 
     it('タスクが見つからないときはNotFoundExceptionを投げること', async () => {
-      mockRepository.findById.mockResolvedValue(null);
+      mockTaskRepository.findById.mockResolvedValue(null);
 
       await expect(service.remove('invalid-id')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('assignTo', () => {
+    it('タスクにユーザーをアサインできること', async () => {
+      const mockTask = buildMockTask();
+      const mockUser = buildMockUser();
+      mockTaskRepository.findById.mockResolvedValue(mockTask);
+      mockUserRepository.findById.mockResolvedValue(mockUser);
+      mockTaskRepository.save.mockResolvedValue(undefined);
+
+      const result = await service.assignTo('uuid-1', 'user-uuid-1');
+
+      expect(result.assigneeId).toBe('user-uuid-1');
+    });
+
+    it('タスクが見つからないときはNotFoundExceptionを投げること', async () => {
+      mockTaskRepository.findById.mockResolvedValue(null);
+
+      await expect(service.assignTo('invalid-id', 'user-uuid-1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('ユーザーが見つからないときはNotFoundExceptionを投げること', async () => {
+      const mockTask = buildMockTask();
+      mockTaskRepository.findById.mockResolvedValue(mockTask);
+      mockUserRepository.findById.mockResolvedValue(null);
+
+      await expect(service.assignTo('uuid-1', 'invalid-user-id')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('unassign', () => {
+    it('タスクのアサインを解除できること', async () => {
+      const mockTask = buildMockTask({ assigneeId: 'user-uuid-1' });
+      mockTaskRepository.findById.mockResolvedValue(mockTask);
+      mockTaskRepository.save.mockResolvedValue(undefined);
+
+      const result = await service.unassign('uuid-1');
+
+      expect(result.assigneeId).toBeNull();
+    });
+
+    it('タスクが見つからないときはNotFoundExceptionを投げること', async () => {
+      mockTaskRepository.findById.mockResolvedValue(null);
+
+      await expect(service.unassign('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 });
