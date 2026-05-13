@@ -5,11 +5,14 @@ import { TasksModule } from './tasks/tasks.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from './tasks/infrastructure/persistence/task.entity';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { UsersModule } from './users/users.module';
+import { User } from './users/infrastructure/persistence/user.entity';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     TasksModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -17,7 +20,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Task],
+      entities: [Task, User],
       synchronize: true,
     }),
   ],

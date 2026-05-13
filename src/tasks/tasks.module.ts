@@ -7,9 +7,10 @@ import { TaskRepositoryImpl } from './infrastructure/task.repository';
 import { ITaskRepository } from './domain/repositories/task.repository';
 import { TaskCreatedHandler } from './application/event-handlers/task-created.handler';
 import { TaskStatusChangedHandler } from './application/event-handlers/task-status-changed.handler';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task])],
+  imports: [TypeOrmModule.forFeature([Task]), UsersModule],
   controllers: [TasksController],
   providers: [
     TasksService,

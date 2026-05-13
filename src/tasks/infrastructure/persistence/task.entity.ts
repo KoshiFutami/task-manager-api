@@ -20,6 +20,9 @@ export class Task {
   @Column()
   status: string;
 
+  @Column({ type: 'varchar', length: 36, nullable: true })
+  assigneeId: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

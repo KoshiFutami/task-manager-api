@@ -56,6 +56,7 @@ export class TaskRepositoryImpl extends ITaskRepository {
       title: entity.title,
       description: entity.description,
       status: entity.status,
+      assigneeId: entity.assigneeId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
