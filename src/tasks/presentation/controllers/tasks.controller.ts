@@ -27,4 +27,17 @@ export class TasksController {
   remove(@Param('id') id: string) {
     return this.tasksService.remove(id);
   }
+
+  @Patch(':taskId/assign/:userId')
+  assignTo(
+    @Param('taskId') taskId: string,
+    @Param('userId') userId: string,
+  ): Promise<TaskResponseDto> {
+    return this.tasksService.assignTo(taskId, userId);
+  }
+
+  @Patch(':taskId/unassign')
+  unassign(@Param('taskId') taskId: string): Promise<TaskResponseDto> {
+    return this.tasksService.unassign(taskId);
+  }
 }
