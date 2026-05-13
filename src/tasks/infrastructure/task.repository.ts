@@ -45,6 +45,7 @@ export class TaskRepositoryImpl extends ITaskRepository {
     entity.title = task.getTitle().getValue();
     entity.description = task.getDescription().getValue();
     entity.status = task.getStatus().getValue();
+    entity.assigneeId = task.getAssigneeId()?.getValue() ?? null;
     entity.createdAt = task.getCreatedAt();
     entity.updatedAt = task.getUpdatedAt();
     return entity;
